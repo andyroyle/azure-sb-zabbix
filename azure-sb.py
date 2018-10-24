@@ -16,13 +16,14 @@ def main(argv):
   p.add_option('-n', '--keyname', action='store', type='string', dest='keyname', default='RootManageSharedAccessKey', help='The key name that the given access key relates to')
 
   p.add_option('-a', '--action', action='store', type='choice', dest='action', default=None, help='The action you want to take',
-		                   choices=['topic-size', 'topic-percent', 'subscription-active'])
+		                   choices=['queue-count','topic-size', 'topic-percent', 'subscription-active'])
   p.add_option('-t', '--topic', action='store', type='string', dest='topic', default=None, help='The topic you want to interrogate')
+  p.add_option('-q', '--queue', action='store', type='string', dest='queue', default=None, help='The queue you want to interrogate')
   p.add_option('-s', '--subscription', action='store', type='string', dest='subscription', default=None, help='The subscription you want to interrogate')
 
   options, arguments = p.parse_args()
 
-  if options.host is None or options.key is None or options.topic is None:
+  if options.host is None or options.key is None or options.queue is None or options.topic is None:
      return p.print_help()
 
   sbs = get_sbs(options)
@@ -33,8 +34,13 @@ def main(argv):
     return get_topic_percent(sbs, options.topic)
   elif options.action == 'subscription-active':
     return get_subscription_active(sbs, options.topic, options.subscription)
+  elif options.action == 'queue-count':
+    return get_queue_count(sbs, options.queue)
   else:
     p.print_help()
+
+def get_queue_count(sbs, queue_name):
+  print sbs.get_queue(queue_name).message_count
 
 def get_topic_size(sbs, topic_name):
   print sbs.get_topic(topic_name).size_in_bytes
